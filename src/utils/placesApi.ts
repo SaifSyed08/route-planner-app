@@ -42,7 +42,7 @@ export const findNearbyWifiLocations = async (
   radius: number = 5000
 ): Promise<NearbyWifiLocation[]> => {
   // Get API key from environment variable
-  const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+  const apiKey = process.env.GOOGLE_PLACES_KEY;
   
   if (!apiKey) {
     console.warn('Google Places API key not found in environment variables, using mock data');
