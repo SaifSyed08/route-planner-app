@@ -50,7 +50,7 @@ const response = await fetch(
 );
 
   if (!apiKey) {
-    console.warn('Google Places API key not found in environment variables, using mock data');
+    console.log('Google Places API key not found in environment variables, using mock data');
     return getMockWifiLocations(coordinates);
   }
 
