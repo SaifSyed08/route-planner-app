@@ -203,7 +203,7 @@ useEffect(() => {
        : 'bg-blue-600'
    }`}
  >
-   {optimizedRoute.points.some(p => p.id === point.id) ? 'Delete' : 'Readd'}
+   {optimizedRoute.points.some(p => p.id === point.id) ? 'Delete' : 'Add'}
  </button>
 
 
