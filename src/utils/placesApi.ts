@@ -153,7 +153,7 @@ export const getMockWifiLocations = (coordinates: Coordinate[]): NearbyWifiLocat
       id: 'mock_wifi_1',
       lat: bounds.south + (bounds.north - bounds.south) * 0.7,
       lng: bounds.west + (bounds.east - bounds.west) * 0.6,
-      name: 'Coffee Bean Cafe',
+      name: 'The Coffee Bean Cafe',
       type: 'wifi',
       placeId: 'mock_place_1',
       types: ['cafe', 'food', 'establishment'],
