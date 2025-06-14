@@ -67,7 +67,7 @@ export const findNearbyWifiLocations = async (
 
   try {
     for (const placeType of WIFI_PLACE_TYPES) {
-      const url = `/api/wifi?lat=${centerLat}&lng=${centerLng}&type=${placeType}&key=${apiKey}`;
+      const url = `/.netlify/functions/wifi?lat=${centerLat}&lng=${centerLng}&type=${placeType}&key=${apiKey}`;
       const response = await fetch(url);
       if (!response.ok) {
         console.warn(`Failed to fetch ${placeType}:`, response.statusText);
