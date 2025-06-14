@@ -234,11 +234,15 @@ useEffect(() => {
     <span className="text-purple-600">WiFi Available</span>
     {(point as any).rating && <>⭐ {(point as any).rating}/5<br/></>}
     <button
-      onClick={e => { e.stopPropagation(); onTogglePoint?.(point.id); }}
-      className="mt-2 px-2 py-1 text-xs font-medium text-white bg-red-600 rounded"
-    >
-      {optimizedRoute.points.some(p => p.id === point.id) ? 'Delete' : 'Readd'}
-    </button>
+   onClick={e => { e.stopPropagation(); onTogglePoint?.(point.id); }}
+   className={`mt-2 px-2 py-1 text-xs font-medium text-white rounded ${
+     optimizedRoute.points.some(p => p.id === point.id)
+       ? 'bg-red-600'
+       : 'bg-blue-600'
+   }`}
+ >
+   {optimizedRoute.points.some(p => p.id === point.id) ? 'Delete' : 'Add'}
+ </button>
   </div>
 </Popup>
             </Marker>
