@@ -215,8 +215,16 @@ setFocusEnableOrder(false)
                 Upload a CSV file containing 37 coordinates (6×6 grid + 1 center point)
               </p>
               <p className="text-sm text-slate-500">
-                Format: latitude, longitude (one pair per row, with header)
-              </p>
+  Don't have an AOI grid?{" "}
+  <a
+    href="https://nesec.strategies.org/SEES2022_CreateSamplingGrid.html"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-600 hover:underline"
+  >
+    Get one here
+  </a>
+</p>
             </div>
             
             <FileUpload onFileUpload={handleFileUpload} loading={loading} />
