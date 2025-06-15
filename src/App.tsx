@@ -162,7 +162,7 @@ setFocusEnableOrder(false)
               </div>
               <div>
                 <h1 className="text-xl font-bold text-slate-900">AOI Route Optimizer</h1>
-                <p className="text-sm text-slate-600">Saif Syed</p>
+                <p className="text-sm text-slate-600">NASA SEES</p>
               </div>
             </div>
             
