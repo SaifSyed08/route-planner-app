@@ -215,7 +215,7 @@ setFocusEnableOrder(false)
                 Upload a CSV file containing 37 coordinates (6×6 grid + 1 center point)
               </p>
               <p className="text-sm text-slate-500">
-  Don't have an AOI grid?{" "}
+  Don't have a sampling grid?{" "}
   <a
     href="https://nesec.strategies.org/SEES2022_CreateSamplingGrid.html"
     target="_blank"
