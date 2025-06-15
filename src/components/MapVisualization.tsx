@@ -333,7 +333,7 @@ useEffect(() => {
               className="flex items-center space-x-1 px-2 py-1 border border-blue-600 text-blue-600 text-xs rounded-full hover:bg-blue-50"
             >
               <span className="font-bold">#</span>
-              <span>Route Order</span>
+              <span>Show Route Order</span>
             </button>
           </div>
         </div>
