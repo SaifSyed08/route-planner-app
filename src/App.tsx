@@ -222,7 +222,7 @@ setFocusEnableOrder(false)
     rel="noopener noreferrer"
     className="text-blue-600 hover:underline"
   >
-    Get one here
+    Get one here!
   </a>
 </p>
             </div>
