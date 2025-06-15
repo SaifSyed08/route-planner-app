@@ -210,7 +210,7 @@ setFocusEnableOrder(false)
         {state === 'upload' && (
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Upload Your Route Data</h2>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Upload Your Sampling Grid</h2>
               <p className="text-lg text-slate-600 mb-2">
                 Upload a CSV file containing 37 coordinates (6×6 grid + 1 center point)
               </p>
