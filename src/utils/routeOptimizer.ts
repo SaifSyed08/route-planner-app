@@ -58,11 +58,6 @@ export const optimizeRoute = async (
     currentPoint = nextPoint;
   }
 
-  // Add return to center
-  if (currentPoint.id !== centerPoint.id) {
-    route.push(centerPoint);
-  }
-
   const optimizedRoute = apply2OptImprovement(route, distanceMatrix);
   const totals = calculateRouteTotals(optimizedRoute, distanceMatrix);
 
