@@ -82,7 +82,6 @@ export const optimizeRoute = async (
   };
 };
 
-
 const findNearestPoint = (
   from: Coordinate,
   candidates: Coordinate[],
@@ -99,47 +98,6 @@ const findNearestPoint = (
     }
   }
   return nearest;
-};
-
-const hasConsecutiveWiFi = (route: Coordinate[]): boolean =>
-  route.some((p, i) => p.type === 'wifi' && route[i + 1]?.type === 'wifi');
-
-const apply2OptImprovement = (
-  route: Coordinate[],
-  distanceMatrix: DistanceMatrix
-): Coordinate[] => {
-  if (route.length <= 3) return route;
-  let bestRoute = [...route];
-  let bestDist = calculateRouteTotals(bestRoute, distanceMatrix).distance;
-  let improved = true;
-
-  while (improved) {
-    improved = false;
-    for (let i = 1; i < bestRoute.length - 2; i++) {
-      for (let j = i + 1; j < bestRoute.length - 1; j++) {
-        const candidate = twoOptSwap(bestRoute, i, j);
-        if (hasConsecutiveWiFi(candidate)) continue;
-        const d = calculateRouteTotals(candidate, distanceMatrix).distance;
-        if (d < bestDist) {
-          bestDist = d;
-          bestRoute = candidate;
-          improved = true;
-        }
-      }
-    }
-  }
-
-  return bestRoute;
-};
-
-const twoOptSwap = (route: Coordinate[], i: number, j: number): Coordinate[] => {
-  const newRoute = [...route];
-  while (i < j) {
-    [newRoute[i], newRoute[j]] = [newRoute[j], newRoute[i]];
-    i++;
-    j--;
-  }
-  return newRoute;
 };
 
 const calculateRouteTotals = (
