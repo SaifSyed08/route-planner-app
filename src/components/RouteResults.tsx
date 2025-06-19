@@ -98,9 +98,9 @@ export default function RouteResults({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-slate-600">Total Stops</span>
+                <span className="text-sm text-slate-600">Grid Stops</span>
               </div>
-              <span className="font-semibold text-slate-900">{routePoints.length}</span>
+              <span className="font-semibold text-slate-900"> {routePoints.length - routePoints.filter(p => p.type === 'wifi').length}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
