@@ -15,6 +15,7 @@ type AppState = 'upload' | 'configure' | 'processing' | 'results';
 interface AppData {
   coordinates: Coordinate[];
   wifiLocations: Coordinate[];
+  customWifiLocations: Coordinate[];
   optimizedRoute: OptimizedRoute | null;
   params: RouteOptimizationParams;
 }
@@ -24,10 +25,12 @@ function App() {
   const [data, setData] = useState<AppData>({
     coordinates: [],
     wifiLocations: [],
+    customWifiLocations: [],
     optimizedRoute: null,
     params: {
       wifiInterval: 5,
-      maxWifiSearchRadius: 5000
+      maxWifiSearchRadius: 5000,
+      enableWifiStops: true
     }
   });
   const [loading, setLoading] = useState(false);
@@ -73,25 +76,53 @@ const [focusEnableOrder, setFocusEnableOrder] = useState(false)
     }));
   }, []);
 
+  const handleCustomWifiChange = useCallback((customWifiLocations: Coordinate[]) => {
+    setData(prev => ({
+      ...prev,
+      customWifiLocations
+    }));
+  }, []);
+
   const handleOptimizeRoute = useCallback(async () => {
     setLoading(true);
     setError(null);
     setState('processing');
 
     try {
-      // Find real WiFi locations using environment variable API key
       let wifiLocations: Coordinate[] = [];
       
-      try {
-        console.log('Searching for real WiFi locations using Google Places API...');
-        wifiLocations = await findNearbyWifiLocations(
-          data.coordinates,
-          data.params.maxWifiSearchRadius
-        );
-        console.log(`Found ${wifiLocations.length} real WiFi locations`);
-      } catch (err) {
-        console.warn('Failed to fetch real WiFi locations, using mock data:', err);
-        wifiLocations = getMockWifiLocations(data.coordinates);
+      // Only find WiFi locations if WiFi stops are enabled
+      if (data.params.enableWifiStops) {
+        // Combine custom WiFi locations with discovered ones
+        wifiLocations = [...data.customWifiLocations];
+        
+        try {
+          console.log('Searching for real WiFi locations using Google Places API...');
+          const discoveredWifi = await findNearbyWifiLocations(
+            data.coordinates,
+            data.params.maxWifiSearchRadius
+          );
+          
+          // Filter out any discovered locations that are too close to custom ones
+          const filteredDiscovered = discoveredWifi.filter(discovered => {
+            return !data.customWifiLocations.some(custom => {
+              const distance = Math.sqrt(
+                Math.pow(discovered.lat - custom.lat, 2) + 
+                Math.pow(discovered.lng - custom.lng, 2)
+              );
+              return distance < 0.001; // ~100m threshold
+            });
+          });
+          
+          wifiLocations = [...wifiLocations, ...filteredDiscovered];
+          console.log(`Found ${discoveredWifi.length} discovered + ${data.customWifiLocations.length} custom WiFi locations`);
+        } catch (err) {
+          console.warn('Failed to fetch discovered WiFi locations, using custom + mock data:', err);
+          const mockWifi = getMockWifiLocations(data.coordinates);
+          wifiLocations = [...wifiLocations, ...mockWifi];
+        }
+      } else {
+        console.log('WiFi stops disabled, optimizing grid points only');
       }
 
       // Calculate real road-based distance matrix
@@ -99,15 +130,16 @@ const [focusEnableOrder, setFocusEnableOrder] = useState(false)
       const allPoints = [...data.coordinates, ...wifiLocations];
       const distanceMatrix = await calculateDistanceMatrix(allPoints);
 
-      // Optimize route with real constraints
-      console.log('Optimizing route with WiFi constraints...');
+      // Optimize route with or without WiFi constraints
+      console.log('Optimizing route...');
       const optimizedRoute = await optimizeRoute(
         data.coordinates,
         wifiLocations,
         distanceMatrix,
         {
           wifiInterval: data.params.wifiInterval,
-          startFromCenter: true
+          startFromCenter: true,
+          enableWifiStops: data.params.enableWifiStops
         }
       );
 
@@ -115,7 +147,8 @@ const [focusEnableOrder, setFocusEnableOrder] = useState(false)
         totalDistance: optimizedRoute.totalDistance,
         totalTime: optimizedRoute.totalTime,
         wifiStops: optimizedRoute.wifiStops,
-        totalStops: optimizedRoute.points.length
+        totalStops: optimizedRoute.points.length,
+        wifiEnabled: data.params.enableWifiStops
       });
 
       setData(prev => ({
@@ -132,7 +165,7 @@ const [focusEnableOrder, setFocusEnableOrder] = useState(false)
     } finally {
       setLoading(false);
     }
-  }, [data.coordinates, data.params]);
+  }, [data.coordinates, data.params, data.customWifiLocations]);
 
   const resetApp = useCallback(() => {
     setState('upload');
@@ -141,10 +174,12 @@ setFocusEnableOrder(false)
     setData({
       coordinates: [],
       wifiLocations: [],
+      customWifiLocations: [],
       optimizedRoute: null,
       params: {
         wifiInterval: 5,
-        maxWifiSearchRadius: 5000
+        maxWifiSearchRadius: 5000,
+        enableWifiStops: true
       }
     });
     setError(null);
@@ -253,6 +288,8 @@ setFocusEnableOrder(false)
               <ParameterConfig
                 params={data.params}
                 onChange={handleParameterChange}
+                customWifiLocations={data.customWifiLocations}
+                onCustomWifiChange={handleCustomWifiChange}
               />
               
               <div className="mt-8 flex space-x-4">
@@ -291,14 +328,29 @@ setFocusEnableOrder(false)
                     <MapPin className="w-4 h-4 text-blue-600" />
                     <span className="text-slate-700">Grid Points: {data.coordinates.length - 1}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Wifi className="w-4 h-4 text-purple-600" />
-                    <span className="text-slate-700">WiFi Interval: {data.params.wifiInterval}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Settings className="w-4 h-4 text-slate-600" />
-                    <span className="text-slate-700">Search Radius: {data.params.maxWifiSearchRadius/1000}km</span>
-                  </div>
+                  {data.params.enableWifiStops ? (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <Wifi className="w-4 h-4 text-purple-600" />
+                        <span className="text-slate-700">WiFi Interval: {data.params.wifiInterval}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Settings className="w-4 h-4 text-slate-600" />
+                        <span className="text-slate-700">Search Radius: {data.params.maxWifiSearchRadius/1000}km</span>
+                      </div>
+                      {data.customWifiLocations.length > 0 && (
+                        <div className="flex items-center space-x-2 col-span-2">
+                          <Wifi className="w-4 h-4 text-purple-600" />
+                          <span className="text-slate-700">Custom WiFi: {data.customWifiLocations.length} locations</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex items-center space-x-2 col-span-2">
+                      <Settings className="w-4 h-4 text-slate-600" />
+                      <span className="text-slate-700">WiFi stops disabled - grid points only</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -310,9 +362,20 @@ setFocusEnableOrder(false)
             <div className="animate-spin w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-6"></div>
             <h2 className="text-2xl font-bold text-slate-900 mb-4">Optimizing Your Route</h2>
             <div className="space-y-2 text-slate-600">
-              <p className="text-lg">Finding real WiFi locations using Google Places API...</p>
-              <p className="text-sm">Calculating road-based distances with OSRM...</p>
-              <p className="text-sm">Solving constrained routing optimization...</p>
+              {data.params.enableWifiStops ? (
+                <>
+                  <p className="text-lg">Finding WiFi locations using Google Places API...</p>
+                  <p className="text-sm">Including {data.customWifiLocations.length} custom WiFi locations...</p>
+                  <p className="text-sm">Calculating road-based distances with OSRM...</p>
+                  <p className="text-sm">Solving constrained routing optimization...</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg">Optimizing grid-only route...</p>
+                  <p className="text-sm">Calculating road-based distances with OSRM...</p>
+                  <p className="text-sm">Finding optimal path through all grid points...</p>
+                </>
+              )}
             </div>
             <p className="text-sm text-slate-500 mt-4">
               This may take a few moments depending on the number of coordinates and API response times.
@@ -326,7 +389,10 @@ setFocusEnableOrder(false)
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">Optimized Route Results</h2>
                 <p className="text-sm text-slate-600 mt-1">
-                  Real-world routing with actual WiFi locations from Google Places API
+                  {data.params.enableWifiStops 
+                    ? 'Real-world routing with WiFi locations from Google Places API'
+                    : 'Grid-only route optimization without WiFi stops'
+                  }
                 </p>
               </div>
               <div className="flex space-x-3">

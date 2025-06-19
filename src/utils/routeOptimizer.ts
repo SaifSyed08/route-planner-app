@@ -3,6 +3,7 @@ import { Coordinate, DistanceMatrix, OptimizedRoute } from '../types';
 export interface OptimizationParams {
   wifiInterval: number;
   startFromCenter: boolean;
+  enableWifiStops?: boolean;
 }
 
 export const optimizeRoute = async (
@@ -18,6 +19,21 @@ export const optimizeRoute = async (
     .filter(p => !p.isCenter && p.type !== 'center')
     .map((p, index) => ({ ...p, gridIndex: index + 1 }));
 
+  // If WiFi stops are disabled, just optimize the grid points
+  if (!params.enableWifiStops) {
+    const route = [centerPoint, ...nonCenterPoints];
+    const optimizedRoute = apply2OptImprovement(route, distanceMatrix);
+    const totals = calculateRouteTotals(optimizedRoute, distanceMatrix);
+
+    return {
+      points: optimizedRoute,
+      totalDistance: totals.distance,
+      totalTime: totals.duration,
+      wifiStops: 0
+    };
+  }
+
+  // Original WiFi-enabled optimization logic
   const route: Coordinate[] = [centerPoint];
   const unvisitedOriginal = new Set(nonCenterPoints.map(p => p.id));
   const availableWifi = new Set(wifiLocations.map(p => p.id));

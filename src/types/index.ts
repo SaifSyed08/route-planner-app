@@ -13,6 +13,7 @@ export interface Coordinate {
 export interface RouteOptimizationParams {
   wifiInterval: number;
   maxWifiSearchRadius: number;
+  enableWifiStops: boolean;
 }
 
 export interface OptimizedRoute {
