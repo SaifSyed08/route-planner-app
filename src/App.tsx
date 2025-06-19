@@ -196,7 +196,7 @@ setFocusEnableOrder(false)
                 <Route className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">AOI Route Optimizer</h1>
+                <h1 className="text-xl font-bold text-slate-900">AOI Route Planner</h1>
                 <p className="text-sm text-slate-600">NASA SEES</p>
               </div>
             </div>
