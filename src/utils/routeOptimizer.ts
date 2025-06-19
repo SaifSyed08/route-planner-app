@@ -19,21 +19,19 @@ export const optimizeRoute = async (
     .filter(p => !p.isCenter && p.type !== 'center')
     .map((p, index) => ({ ...p, gridIndex: index + 1 }));
 
-  // If WiFi stops are disabled, just optimize the grid points
   if (!params.enableWifiStops) {
-    const route = [centerPoint, ...nonCenterPoints];
-    const optimizedRoute = apply2OptImprovement(route, distanceMatrix);
-    const totals = calculateRouteTotals(optimizedRoute, distanceMatrix);
+    const greedyRoute = greedyNearestNeighbor([centerPoint, ...nonCenterPoints], distanceMatrix, centerPoint);
+    const totals = calculateRouteTotals(greedyRoute, distanceMatrix);
 
     return {
-      points: optimizedRoute,
+      points: greedyRoute,
       totalDistance: totals.distance,
       totalTime: totals.duration,
       wifiStops: 0
     };
   }
 
-  // Original WiFi-enabled optimization logic
+  // WiFi-enabled routing (still greedy)
   const route: Coordinate[] = [centerPoint];
   const unvisitedOriginal = new Set(nonCenterPoints.map(p => p.id));
   const availableWifi = new Set(wifiLocations.map(p => p.id));
@@ -74,14 +72,13 @@ export const optimizeRoute = async (
     currentPoint = nextPoint;
   }
 
-  const optimizedRoute = apply2OptImprovement(route, distanceMatrix);
-  const totals = calculateRouteTotals(optimizedRoute, distanceMatrix);
+  const totals = calculateRouteTotals(route, distanceMatrix);
 
   return {
-    points: optimizedRoute,
+    points: route,
     totalDistance: totals.distance,
     totalTime: totals.duration,
-    wifiStops: optimizedRoute.filter(p => p.type === 'wifi').length
+    wifiStops: route.filter(p => p.type === 'wifi').length
   };
 };
 
@@ -101,47 +98,6 @@ const findNearestPoint = (
     }
   }
   return nearest;
-};
-
-const hasConsecutiveWiFi = (route: Coordinate[]): boolean =>
-  route.some((p, i) => p.type === 'wifi' && route[i + 1]?.type === 'wifi');
-
-const apply2OptImprovement = (
-  route: Coordinate[],
-  distanceMatrix: DistanceMatrix
-): Coordinate[] => {
-  if (route.length <= 3) return route;
-  let bestRoute = [...route];
-  let bestDist = calculateRouteTotals(bestRoute, distanceMatrix).distance;
-  let improved = true;
-
-  while (improved) {
-    improved = false;
-    for (let i = 1; i < bestRoute.length - 2; i++) {
-      for (let j = i + 1; j < bestRoute.length - 1; j++) {
-        const candidate = twoOptSwap(bestRoute, i, j);
-        if (hasConsecutiveWiFi(candidate)) continue;
-        const d = calculateRouteTotals(candidate, distanceMatrix).distance;
-        if (d < bestDist) {
-          bestDist = d;
-          bestRoute = candidate;
-          improved = true;
-        }
-      }
-    }
-  }
-
-  return bestRoute;
-};
-
-const twoOptSwap = (route: Coordinate[], i: number, j: number): Coordinate[] => {
-  const newRoute = [...route];
-  while (i < j) {
-    [newRoute[i], newRoute[j]] = [newRoute[j], newRoute[i]];
-    i++;
-    j--;
-  }
-  return newRoute;
 };
 
 const calculateRouteTotals = (
