@@ -19,21 +19,19 @@ export const optimizeRoute = async (
     .filter(p => !p.isCenter && p.type !== 'center')
     .map((p, index) => ({ ...p, gridIndex: index + 1 }));
 
-  // If WiFi stops are disabled, just optimize the grid points
   if (!params.enableWifiStops) {
-    const route = [centerPoint, ...nonCenterPoints];
-    const optimizedRoute = apply2OptImprovement(route, distanceMatrix);
-    const totals = calculateRouteTotals(optimizedRoute, distanceMatrix);
+    const greedyRoute = greedyNearestNeighbor([centerPoint, ...nonCenterPoints], distanceMatrix, centerPoint);
+    const totals = calculateRouteTotals(greedyRoute, distanceMatrix);
 
     return {
-      points: optimizedRoute,
+      points: greedyRoute,
       totalDistance: totals.distance,
       totalTime: totals.duration,
       wifiStops: 0
     };
   }
 
-  // Original WiFi-enabled optimization logic
+  // WiFi-enabled routing (still greedy)
   const route: Coordinate[] = [centerPoint];
   const unvisitedOriginal = new Set(nonCenterPoints.map(p => p.id));
   const availableWifi = new Set(wifiLocations.map(p => p.id));
@@ -74,16 +72,16 @@ export const optimizeRoute = async (
     currentPoint = nextPoint;
   }
 
-  const optimizedRoute = apply2OptImprovement(route, distanceMatrix);
-  const totals = calculateRouteTotals(optimizedRoute, distanceMatrix);
+  const totals = calculateRouteTotals(route, distanceMatrix);
 
   return {
-    points: optimizedRoute,
+    points: route,
     totalDistance: totals.distance,
     totalTime: totals.duration,
-    wifiStops: optimizedRoute.filter(p => p.type === 'wifi').length
+    wifiStops: route.filter(p => p.type === 'wifi').length
   };
 };
+
 
 const findNearestPoint = (
   from: Coordinate,
