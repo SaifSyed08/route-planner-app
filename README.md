@@ -1,43 +1,62 @@
-# NASA Route Optimizer
+# 🛰️ NASA Route Optimizer
 
 ## Overview
 
-Environmental field teams often need to visit dozens of geographically dispersed locations during a single data collection campaign (called an Area of Interest, in which there's a 6x6 grid of points around a center point, resulting in 37 total destinations). Issue: Existing navigation platforms such as Google Maps and Apple Maps can only support up 10 destinations, making them unsuitable for our use case of large-scale field operations. Without an optimal navigation route, this leaves researchers with unnecessary travel and unneeded guesswork.
+During my NASA SEES internship, I encountered a surprisingly difficult operational problem.
 
-To address this limitation, I developed a web-based route optimization platform during my NASA SEES internship that generates efficient routes for large destination sets and helps reduce travel time for environmental data collection teams.
+Environmental field teams needed to visit 37 geographically distributed data collection sites during a single campaign. Existing navigation tools such as Google Maps and Apple Maps generally support only around 10 destinations, forcing researchers to manually split routes and spend significant time planning logistics.
 
-## Problem
+I wanted to determine whether this process could be automated.
 
-The route optimization problem becomes computationally intractable as the number of destinations increases.
+## The Challenge
 
-For a 37-location route:
+At first glance, route planning appears straightforward:
 
-37! ≈ 1.38 × 10^43 possible route combinations
+> Find the shortest route.
 
-With more combinations than seconds since the Big Bang, exhaustively evaluating every route until you find the best is impossible in practice (even at a trillion routes per second, it would still take 400 billion years to cover them all), requiring optimization techniques capable of identifying high-quality solutions efficiently.
+However, for 37 destinations, there are approximately **1.38 × 10^43** possible visitation orders.
 
-## Technical Approach
+This is a classic example of combinatorial explosion. Even if a computer evaluated one trillion routes every second, it would still take more than **400 billion years** to test them all.
 
-The platform integrates road-network APIs with custom route optimization algorithms to:
+The project became an exercise in reasoning under computational constraints: how can we identify high-quality solutions when finding the perfect solution is effectively impossible?
 
-* Retrieve real-world travel distances and times
-* Construct weighted route networks
-* Generate near-optimal visitation sequences
-* Visualize optimized routes through an interactive web interface
+## Approach
 
-The system was designed to balance computational efficiency with route quality, enabling practical deployment for large field campaigns.
+I built a web-based route optimization platform that combines real-world road-network data with optimization algorithms.
 
-## Results
+The system:
 
-* Supported routing problems involving up to 37 destinations
-* Reduced field data collection travel time by approximately 80%
-* Enabled more efficient environmental data collection workflows
-* Published on GLOBE.gov following recommendation from NASA mentors
+* Retrieves travel distances and times from mapping APIs
+* Represents destinations as weighted route networks
+* Searches for efficient visitation sequences without enumerating every possibility
+* Visualizes optimized routes through an interactive web interface
+
+Rather than attempting exhaustive search, the platform uses algorithmic techniques designed to efficiently navigate a vast solution space and identify strong solutions within practical runtime limits.
+
+## Impact
+
+* Reduced field-team travel time by approximately **80%**
+* Supported environmental research operations across the United States
+* Solved routing problems involving up to **37 destinations**
+* Featured on NASA-affiliated GLOBE.gov following recommendation from project mentors
+
+## External Publication
+
+This project was featured in a NASA-affiliated article on GLOBE.gov:
+
+**Saif: SEES Earth System Explorer 2025**
+https://www.globe.gov/web/mission-mosquito/overview/science-cafe-posts/-/blogs/saif-sees-earth-system-explorer-2025
+
+The article discusses the development of the route optimization platform and its role in supporting environmental field operations during the NASA STEM Enhancement in Earth Science (SEES) program.
+
+## What I Learned
+
+This project fundamentally changed how I think about problem solving.
+
+Many real-world problems cannot be solved through brute force. Instead, progress comes from understanding the structure of a problem, identifying useful approximations, and designing systems that make effective decisions under constraints.
+
+Building the optimizer introduced me to ideas from algorithms, optimization, and large-scale search, areas that continue to shape how I approach technical problems today.
 
 ## Technologies
 
-Python, JavaScript, Route Optimization Algorithms, Mapping APIs, Web Development
-
-## Recognition
-
-The project was featured on GLOBE.gov and developed as part of the NASA STEM Enhancement in Earth Science (SEES) Program.
+Python • JavaScript • Optimization Algorithms • Mapping APIs • Full-Stack Development
